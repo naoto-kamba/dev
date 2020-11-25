@@ -2,10 +2,11 @@ import path from 'path'
 import fs from 'fs'
 import matter from 'gray-matter'
 import { ARTICLE_FILE_NAME, POSTS_DIR } from './Constants'
+import { formatDate } from './date'
 
 export type FrontMatter = {
   title: string
-  published: string
+  published: Date
   tags: string
 }
 
@@ -24,7 +25,7 @@ export const analyzeMarkdown = async (slug: string) => {
   const tags = mdInfo.tags.split(',').map((tag) => tag.trim())
   return {
     title: mdInfo.title,
-    published: mdInfo.published,
+    published: formatDate(mdInfo.published),
     tags: tags,
     content: matterResult.content,
   }

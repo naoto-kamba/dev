@@ -1,12 +1,22 @@
+import { Article } from 'components/article/Article'
 import { Layout } from 'components/layout/Layout'
 import { BASE_URL } from 'foundations/Constants'
-import { analyzeMarkdown } from 'foundations/MdLoader'
+import { markdownToAmpHtml } from 'foundations/MdConverter'
+import { analyzeMarkdown, readSlugs } from 'foundations/MdLoader'
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
 import Head from 'next/head'
+import path from 'path'
+
+export const config = {
+  amp: true,
+}
 
 export const getStaticPaths: GetStaticPaths<{ slug: string }> = async () => {
+  const paths = readSlugs().map((dirname) => ({
+    params: { slug: path.parse(dirname).name },
+  }))
   return {
-    paths: [{ params: { slug: 'aa' } }],
+    paths,
     fallback: false,
   }
 }
@@ -25,13 +35,14 @@ export const getStaticProps: GetStaticProps<
 > = async (context) => {
   if (context.params) {
     const md = await analyzeMarkdown(context.params.slug)
+    const content = await markdownToAmpHtml(context.params.slug, md.content)
     return {
       props: {
         slug: context.params.slug,
         title: md.title,
         published: md.published,
         tags: md.tags,
-        content: md.content,
+        content: content,
       },
     }
   } else {
